@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from pymongo import MongoClient
 import redis
-from .config import settings
+from ..core.config import settings
 
 # PostgreSQL
 engine = create_engine(settings.postgres_url, pool_pre_ping=True)

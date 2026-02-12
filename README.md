@@ -5,6 +5,18 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 
+## ⚠️ Security Updates
+
+**All dependencies have been updated to secure versions** to address recent CVEs:
+- ✅ FastAPI 0.109.0 → 0.109.1 (ReDoS fix)
+- ✅ LightGBM 4.3.0 → 4.6.0 (RCE fix)
+- ✅ NLTK 3.8.1 → 3.9 (Deserialization fix)
+- ✅ python-multipart 0.0.6 → 0.0.22 (Multiple fixes)
+- ✅ PyTorch 2.1.2 → 2.6.0 (RCE & buffer overflow fixes)
+- ✅ Transformers 4.37.0 → 4.48.0 (Deserialization fixes)
+
+See [SECURITY.md](SECURITY.md) for details.
+
 ## 🚀 AI-Powered Enterprise Operating System
 
 A production-ready, enterprise-scale AI operating system that manages all major company departments using artificial intelligence and machine learning. Built for companies like Google, OpenAI, and Amazon.

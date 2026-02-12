@@ -1,11 +1,11 @@
 # 🏢 AI Enterprise Operating System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B%20%7C%203.13-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 
-## ⚠️ Security Updates
+## ⚠️ Security & Compatibility Updates
 
 **All dependencies have been updated to secure versions** to address recent CVEs:
 - ✅ FastAPI 0.109.0 → 0.109.1 (ReDoS fix)
@@ -14,6 +14,7 @@
 - ✅ python-multipart 0.0.6 → 0.0.22 (Multiple fixes)
 - ✅ PyTorch 2.1.2 → 2.6.0 (RCE & buffer overflow fixes)
 - ✅ Transformers 4.37.0 → 4.48.0 (Deserialization fixes)
+- ✅ **PostgreSQL Driver: psycopg2-binary → psycopg 3.1.18** (Python 3.13 compatibility)
 
 See [SECURITY.md](SECURITY.md) for details.
 
@@ -107,9 +108,16 @@ docker-compose logs -f
 
 ### Local Development
 
+**Requirements:**
+- Python 3.11+ (Python 3.13 fully supported)
+- PostgreSQL 12+ (or use SQLite for development)
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
+
+# Initialize database (optional, for PostgreSQL)
+python backend/init_db.py
 
 # Start backend
 cd backend
@@ -118,6 +126,8 @@ uvicorn main:app --reload --port 8000
 # Start frontend (new terminal)
 streamlit run frontend/app.py
 ```
+
+**Note:** The application now uses `psycopg` 3.x driver which supports Python 3.13+. The legacy `psycopg2-binary` has been replaced for compatibility with newer Python versions.
 
 ## 📁 Project Structure
 
@@ -148,7 +158,7 @@ AI-Enterprise-Command-System/
 
 ### Backend
 - **FastAPI** - High-performance API framework
-- **PostgreSQL** - Relational database
+- **PostgreSQL** - Relational database (with psycopg 3.x driver for Python 3.13+ support)
 - **MongoDB** - Document database
 - **Redis** - Caching layer
 - **SQLAlchemy** - ORM

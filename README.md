@@ -25,7 +25,7 @@ See [DEPLOYMENT_FIX_SUMMARY.md](DEPLOYMENT_FIX_SUMMARY.md) for details.
 - ✅ python-multipart 0.0.6 → 0.0.22 (Multiple fixes)
 - ✅ PyTorch 2.1.2 → 2.6.0 (RCE & buffer overflow fixes)
 - ✅ Transformers 4.37.0 → 4.48.0 (Deserialization fixes)
-- ✅ **PostgreSQL Driver: psycopg2-binary → psycopg 3.1.18** (Python 3.13 compatibility)
+- ✅ **Database Runtime: PostgreSQL dependency removed, SQLite default enabled**
 
 See [SECURITY.md](SECURITY.md) for details.
 
@@ -121,13 +121,13 @@ docker-compose logs -f
 
 **Requirements:**
 - Python 3.11+ (Python 3.13 fully supported)
-- PostgreSQL 12+ (or use SQLite for development)
+- SQLite (default, production-ready for Streamlit Cloud)
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Initialize database (optional, for PostgreSQL)
+# Initialize database (creates SQLite data file)
 python backend/init_db.py
 
 # Start backend
@@ -157,7 +157,7 @@ The app will start in under 10 seconds. See [STREAMLIT_DEPLOYMENT.md](STREAMLIT_
 ```
 
 
-**Note:** The application now uses `psycopg` 3.x driver which supports Python 3.13+. The legacy `psycopg2-binary` has been replaced for compatibility with newer Python versions.
+**Note:** The application now defaults to SQLite via `DATABASE_URL`, which is compatible with Streamlit Cloud and avoids external database startup overhead.
 
 ## 📁 Project Structure
 
@@ -188,7 +188,7 @@ AI-Enterprise-Command-System/
 
 ### Backend
 - **FastAPI** - High-performance API framework
-- **PostgreSQL** - Relational database (with psycopg 3.x driver for Python 3.13+ support)
+- **SQLite** - Relational database (default via SQLAlchemy `DATABASE_URL`)
 - **MongoDB** - Document database
 - **Redis** - Caching layer
 - **SQLAlchemy** - ORM

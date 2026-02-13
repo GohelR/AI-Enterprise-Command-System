@@ -22,36 +22,38 @@ _redis_client = None
 
 
 def get_engine():
-    """Get or create PostgreSQL engine"""
+    """Get or create SQLAlchemy engine."""
     global _engine, _SessionLocal
     if _engine is None:
         try:
-            _engine = create_engine(
-                settings.postgres_url, 
-                pool_pre_ping=True,
-                connect_args={"connect_timeout": 10}
-            )
+            database_url = settings.sqlalchemy_database_url
+            connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {"connect_timeout": 10}
+
+            _engine = create_engine(database_url, pool_pre_ping=True, connect_args=connect_args)
             _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
-            logger.info("PostgreSQL engine created successfully")
+            logger.info("SQLAlchemy engine created successfully")
         except Exception as e:
-            logger.warning(f"Could not connect to PostgreSQL: {e}")
+            logger.warning(f"Could not create SQLAlchemy engine: {e}")
             # Return None to allow app to start without DB
             return None
     return _engine
 
 
 def get_db():
-    """Get PostgreSQL database session"""
+    """Get SQLAlchemy database session."""
     engine = get_engine()
     if engine is None or _SessionLocal is None:
-        logger.warning("PostgreSQL not available")
-        return
+        raise RuntimeError("Database session is unavailable")
     
     db = _SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+# Backward-compatible exported engine for scripts that import it directly.
+engine = get_engine()
 
 
 def get_mongo_db():

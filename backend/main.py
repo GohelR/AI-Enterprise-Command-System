@@ -28,7 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import services - these should be lazy-loaded
+# Import services at module level (lazy instantiation happens within functions)
 from backend.app.services.hr import screen_resume, analyze_employee_retention
 from backend.app.services.finance import analyze_transaction, forecast_monthly_revenue
 from backend.app.services.customer_support import analyze_support_ticket, process_chatbot_message

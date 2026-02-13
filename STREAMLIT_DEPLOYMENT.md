@@ -40,7 +40,8 @@ The app will start quickly without hanging on "Loading..."
 
 The app uses `.streamlit/config.toml` for optimal performance:
 - Headless mode enabled
-- CORS disabled for security
+- CORS enabled for cross-origin requests
+- XSRF protection enabled for security
 - Optimal upload limits
 - Error details enabled for debugging
 

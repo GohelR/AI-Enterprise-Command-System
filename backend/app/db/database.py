@@ -43,12 +43,11 @@ def get_engine():
 def get_db():
     """Get PostgreSQL database session"""
     engine = get_engine()
-    if engine is None:
+    if engine is None or _SessionLocal is None:
         logger.warning("PostgreSQL not available")
         return
     
-    SessionLocal = _SessionLocal
-    db = SessionLocal()
+    db = _SessionLocal()
     try:
         yield db
     finally:

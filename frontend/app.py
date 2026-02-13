@@ -1,5 +1,6 @@
 """AI Enterprise Operating System - Main Dashboard"""
 
+import os
 import streamlit as st
 import requests
 import pandas as pd
@@ -16,8 +17,8 @@ logger = logging.getLogger(__name__)
 logger.info("Starting AI Enterprise Operating System...")
 
 # Configuration
-API_BASE_URL = "http://localhost:8000/api/v1"
-REQUEST_TIMEOUT = 10  # seconds
+API_BASE_URL = st.secrets.get("API_BASE_URL", os.getenv("API_BASE_URL", "http://localhost:8000/api/v1"))
+REQUEST_TIMEOUT = int(st.secrets.get("REQUEST_TIMEOUT", os.getenv("REQUEST_TIMEOUT", "8")))
 
 # Helper function for API calls with timeout and error handling
 def make_api_call(endpoint, method="GET", data=None):

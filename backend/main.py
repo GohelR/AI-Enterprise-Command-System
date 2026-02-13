@@ -1,8 +1,7 @@
 """Main FastAPI Application"""
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import uvicorn
 
@@ -28,22 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import services at module level (lazy instantiation happens within functions)
-from backend.app.services.hr import screen_resume, analyze_employee_retention
-from backend.app.services.finance import analyze_transaction, forecast_monthly_revenue
-from backend.app.services.customer_support import analyze_support_ticket, process_chatbot_message
-from backend.app.services.marketing import score_and_prioritize_lead, CampaignOptimizer
-from backend.app.services.sales import analyze_customer_health, DealForecasting
-from backend.app.services.cybersecurity import analyze_security_alert
 
-# Create tables only if database is available
-try:
-    engine = get_engine()
-    if engine:
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created successfully")
-except Exception as e:
-    logger.warning(f"Could not create database tables: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -51,6 +35,19 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="AI Enterprise Operating System - Managing all company departments with AI"
 )
+
+
+@app.on_event("startup")
+def initialize_database() -> None:
+    """Initialize database tables on startup."""
+    try:
+        engine = get_engine()
+        if engine:
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.warning(f"Could not create database tables: {e}")
+
 
 # CORS middleware
 app.add_middleware(
@@ -126,6 +123,8 @@ async def login(email: str, password: str, db: Session = Depends(get_db)):
 @app.post("/api/v1/hr/resume/screen")
 async def screen_resume_endpoint(resume: ResumeCreate, current_user: dict = Depends(get_current_user)):
     """Screen a resume"""
+    from backend.app.services.hr import screen_resume
+
     result = screen_resume(resume.resume_text, resume.candidate_name, resume.email)
     return result
 
@@ -133,6 +132,8 @@ async def screen_resume_endpoint(resume: ResumeCreate, current_user: dict = Depe
 @app.post("/api/v1/hr/employee/retention-risk")
 async def analyze_retention(employee_data: dict, current_user: dict = Depends(get_current_user)):
     """Analyze employee retention risk"""
+    from backend.app.services.hr import analyze_employee_retention
+
     result = analyze_employee_retention(employee_data)
     return result
 
@@ -147,6 +148,8 @@ async def analyze_transaction_endpoint(transaction: TransactionCreate, current_u
         'description': transaction.description,
         'date': transaction.date
     }
+    from backend.app.services.finance import analyze_transaction
+
     result = analyze_transaction(transaction_data)
     return result
 
@@ -154,6 +157,8 @@ async def analyze_transaction_endpoint(transaction: TransactionCreate, current_u
 @app.post("/api/v1/finance/revenue/forecast")
 async def forecast_revenue(historical_data: list, current_user: dict = Depends(get_current_user)):
     """Forecast revenue"""
+    from backend.app.services.finance import forecast_monthly_revenue
+
     result = forecast_monthly_revenue(historical_data)
     return result
 
@@ -162,6 +167,8 @@ async def forecast_revenue(historical_data: list, current_user: dict = Depends(g
 @app.post("/api/v1/support/ticket/analyze")
 async def analyze_ticket(ticket: TicketCreate, current_user: dict = Depends(get_current_user)):
     """Analyze support ticket"""
+    from backend.app.services.customer_support import analyze_support_ticket
+
     result = analyze_support_ticket(ticket.subject, ticket.description, ticket.customer_email)
     return result
 
@@ -169,6 +176,8 @@ async def analyze_ticket(ticket: TicketCreate, current_user: dict = Depends(get_
 @app.post("/api/v1/support/chatbot")
 async def chatbot(message: str):
     """AI Chatbot"""
+    from backend.app.services.customer_support import process_chatbot_message
+
     result = process_chatbot_message(message)
     return result
 
@@ -183,6 +192,8 @@ async def score_lead(lead: LeadCreate, current_user: dict = Depends(get_current_
         'company': lead.company,
         'source': lead.source
     }
+    from backend.app.services.marketing import score_and_prioritize_lead
+
     result = score_and_prioritize_lead(lead_data)
     return result
 
@@ -190,6 +201,8 @@ async def score_lead(lead: LeadCreate, current_user: dict = Depends(get_current_
 @app.post("/api/v1/marketing/campaign/optimize")
 async def optimize_campaign(campaign_data: dict, current_user: dict = Depends(get_current_user)):
     """Optimize marketing campaign"""
+    from backend.app.services.marketing import CampaignOptimizer
+
     optimizer = CampaignOptimizer()
     result = optimizer.optimize_campaign(campaign_data)
     return result
@@ -199,6 +212,8 @@ async def optimize_campaign(campaign_data: dict, current_user: dict = Depends(ge
 @app.post("/api/v1/sales/customer/health")
 async def customer_health(customer_data: dict, current_user: dict = Depends(get_current_user)):
     """Analyze customer health"""
+    from backend.app.services.sales import analyze_customer_health
+
     result = analyze_customer_health(customer_data)
     return result
 
@@ -206,6 +221,8 @@ async def customer_health(customer_data: dict, current_user: dict = Depends(get_
 @app.post("/api/v1/sales/deal/forecast")
 async def forecast_deal(deal_data: dict, current_user: dict = Depends(get_current_user)):
     """Forecast deal closure"""
+    from backend.app.services.sales import DealForecasting
+
     forecaster = DealForecasting()
     result = forecaster.forecast_deal(deal_data)
     return result
@@ -222,6 +239,8 @@ async def analyze_alert(alert: SecurityAlertCreate, current_user: dict = Depends
         'destination_ip': alert.destination_ip,
         'description': alert.description
     }
+    from backend.app.services.cybersecurity import analyze_security_alert
+
     result = analyze_security_alert(alert_data)
     return result
 

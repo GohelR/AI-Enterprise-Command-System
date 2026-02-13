@@ -1,5 +1,6 @@
 """Application Configuration"""
 
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -18,12 +19,8 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     API_PREFIX: str = "/api/v1"
     
-    # Database - PostgreSQL
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "ai_enterprise_db"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres_password"
+    # Database - SQLAlchemy/SQLite (Streamlit Cloud compatible)
+    DATABASE_URL: str = "sqlite:///./data/ai_enterprise.db"
     
     # Database - MongoDB
     MONGODB_HOST: str = "localhost"
@@ -55,9 +52,15 @@ class Settings(BaseSettings):
     AWS_REGION: str = "us-east-1"
     
     @property
-    def postgres_url(self) -> str:
-        """Get PostgreSQL connection URL"""
-        return f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    def sqlalchemy_database_url(self) -> str:
+        """Get SQLAlchemy database URL and ensure local SQLite path exists."""
+        if self.DATABASE_URL.startswith("sqlite:///"):
+            raw_path = self.DATABASE_URL.replace("sqlite:///", "", 1)
+            db_path = Path(raw_path)
+            if not db_path.is_absolute():
+                db_path = Path.cwd() / db_path
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+        return self.DATABASE_URL
     
     @property
     def mongodb_url(self) -> str:

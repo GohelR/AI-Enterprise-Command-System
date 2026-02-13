@@ -1,21 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15
-    container_name: ai_enterprise_postgres
-    environment:
-      POSTGRES_DB: ai_enterprise_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - ai_enterprise_network
-
   # MongoDB
   mongodb:
     image: mongo:7
@@ -46,15 +31,11 @@ services:
   # Backend API
   backend:
     build:
-      context: ../..
+      context: .
       dockerfile: deployment/docker/Dockerfile.backend
     container_name: ai_enterprise_backend
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ai_enterprise_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      DATABASE_URL: sqlite:///./data/ai_enterprise.db
       MONGODB_HOST: mongodb
       MONGODB_PORT: 27017
       MONGODB_DB: ai_enterprise_mongo
@@ -66,23 +47,23 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
       - mongodb
       - redis
     volumes:
-      - ../../models:/app/models
-      - ../../logs:/app/logs
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
     networks:
       - ai_enterprise_network
 
   # Frontend Dashboard
   frontend:
     build:
-      context: ../..
+      context: .
       dockerfile: deployment/docker/Dockerfile.frontend
     container_name: ai_enterprise_frontend
     environment:
-      API_BASE_URL: http://backend:8000
+      API_BASE_URL: http://backend:8000/api/v1
     ports:
       - "8501:8501"
     depends_on:
@@ -91,7 +72,6 @@ services:
       - ai_enterprise_network
 
 volumes:
-  postgres_data:
   mongo_data:
   redis_data:
 

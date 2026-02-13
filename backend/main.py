@@ -8,7 +8,7 @@ import uvicorn
 
 from backend.app.core.config import settings
 from backend.app.core.security import get_current_user, create_access_token, create_refresh_token, get_password_hash, verify_password
-from backend.app.db.database import Base, engine, get_db
+from backend.app.db.database import Base, get_engine, get_db
 from backend.app.models.models import User
 from backend.app.schemas.schemas import (
     Token, UserCreate, UserResponse,
@@ -19,8 +19,16 @@ from backend.app.schemas.schemas import (
     CustomerCreate, SecurityAlertCreate,
     DashboardMetrics
 )
+import logging
 
-# Import services
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Import services at module level (lazy instantiation happens within functions)
 from backend.app.services.hr import screen_resume, analyze_employee_retention
 from backend.app.services.finance import analyze_transaction, forecast_monthly_revenue
 from backend.app.services.customer_support import analyze_support_ticket, process_chatbot_message
@@ -28,8 +36,14 @@ from backend.app.services.marketing import score_and_prioritize_lead, CampaignOp
 from backend.app.services.sales import analyze_customer_health, DealForecasting
 from backend.app.services.cybersecurity import analyze_security_alert
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables only if database is available
+try:
+    engine = get_engine()
+    if engine:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+except Exception as e:
+    logger.warning(f"Could not create database tables: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(

@@ -6,15 +6,55 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+logger.info("Starting AI Enterprise Operating System...")
 
 # Configuration
 API_BASE_URL = "http://localhost:8000/api/v1"
+REQUEST_TIMEOUT = 10  # seconds
+
+# Helper function for API calls with timeout and error handling
+def make_api_call(endpoint, method="GET", data=None):
+    """Make API call with timeout and error handling"""
+    try:
+        url = f"{API_BASE_URL}/{endpoint}"
+        if method == "GET":
+            response = requests.get(url, timeout=REQUEST_TIMEOUT)
+        elif method == "POST":
+            response = requests.post(url, json=data, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        return response.json()
+    except requests.Timeout:
+        logger.error(f"API call to {endpoint} timed out")
+        st.error("⚠️ Request timed out. Please try again.")
+        return None
+    except requests.ConnectionError:
+        logger.error(f"Could not connect to API at {endpoint}")
+        st.warning("⚠️ Backend API is not available. Showing demo mode.")
+        return None
+    except Exception as e:
+        logger.error(f"API call failed: {e}")
+        st.error(f"⚠️ Error: {str(e)}")
+        return None
+
+logger.info("Initializing Streamlit app configuration...")
+
 st.set_page_config(
     page_title="AI Enterprise OS",
     page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+logger.info("App configuration set successfully")
 
 # Custom CSS
 st.markdown("""
@@ -494,3 +534,15 @@ st.markdown("""
     <p>AI Enterprise Operating System v1.0.0 | Built with ❤️ for Enterprise Scale</p>
 </div>
 """, unsafe_allow_html=True)
+
+# Health check
+if 'app_loaded' not in st.session_state:
+    st.session_state.app_loaded = True
+    logger.info("App loaded successfully!")
+    with st.sidebar:
+        st.success("✅ App Loaded Successfully")
+
+
+if __name__ == "__main__":
+    logger.info("AI Enterprise Operating System is running...")
+    # Streamlit runs the app automatically, nothing else needed here
